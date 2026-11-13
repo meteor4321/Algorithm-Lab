@@ -9,16 +9,19 @@ export const traceDepthFirstSearch: Algorithm = ({ maze }) =>
   const label = (cell: number) => mazeLabel(map, cell)
   const seen = new Set<number>()
   const stack: number[] = []
+  const checking = new Map<number, number>()
   let path: number[] = []
   let candidate: number | undefined
   Object.assign(variables, { start, target, node: null, neighbor: null, found: null })
   function frame(line: string | null, message: string, kind: Step['kind'] = 'update', result?: Result, backtracked?: number)
   {
     record(line, message, kind, {
+      annotation: line === 'retreat' ? '本行正在退出死路的呼叫；● 顯示退回的位置，↶ 標示剛離開的格子。' : '堆疊左端是起點，右端是目前這一層；下層返回後，上一層從尚未試過的鄰格繼續。',
       maze: { map, active: stack.at(-1), candidate, visited: [...seen], path: path.length ? path : stack, backtracked },
       rows: [
         { label: '來時路線（遞迴堆疊）', values: stack.map(label), active: stack.length - 1 },
         { label: '已走過的格子', values: [...seen].map(label) },
+        { label: '各層暫停的位置', values: stack.map(node => `${label(node)}：${checking.has(node) ? `正在試 ${label(checking.get(node)!)}` : '剛進入，尚未試路'}`), indexed: false },
       ],
     }, result)
   }
@@ -41,6 +44,7 @@ export const traceDepthFirstSearch: Algorithm = ({ maze }) =>
     }
     for (const neighbor of graph[node])
     {
+      checking.set(node, neighbor)
       candidate = neighbor
       variables.neighbor = neighbor
       frame('neighbor', `看看相鄰的${label(neighbor)}。`)

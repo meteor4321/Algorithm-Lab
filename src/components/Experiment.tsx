@@ -56,7 +56,7 @@ export function Experiment({ unit, initial, active, practice = false }: {
           <div className={`experiment-body${editing ? ' editing' : ''}`}>
             {editing && <p className="editing-note">上次套用的時間軸已暫停。</p>}
             <LessonCanvas view={step.view} labels={unit.variables} animate={active && !editing && player.animate}
-              step={step} playing={player.playing} follow={active && !editing} />
+              step={step} stepIndex={player.index} playing={player.playing} follow={active && !editing} />
             <Playback player={player} step={step} last={last} disabled={editing} />
           </div>
         </section>}

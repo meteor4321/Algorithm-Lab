@@ -1,5 +1,5 @@
 import { lessonTrace, order, showItem } from './lesson-trace'
-import type { Algorithm, Element, Step } from './types'
+import type { Algorithm, Element, Region, Step } from './types'
 
 export const traceMergeSort: Algorithm = ({ items }) =>
 {
@@ -11,11 +11,18 @@ export const traceMergeSort: Algorithm = ({ items }) =>
   let showing = false
   function frame(line: string | null, message: string, kind: Step['kind'] = 'update')
   {
+    const start = Number(variables.start)
+    const regions: Region[] = showing ? [
+      { from: start, to: start + left.length - 1, tone: 'prefix', label: '左段來源' },
+      { from: start + left.length, to: start + left.length + right.length - 1, tone: 'suffix', label: '右段來源' },
+    ].filter(region => region.from <= region.to) as Region[] : []
     record(line, message, kind, {
+      regions,
+      annotation: '左右副本各有自己的索引 i、j；已取用的值保留在副本中，以灰底標記。合併暫存完成後整段寫回。',
       rows: showing ? [
-        { label: '左段副本', values: left.map(showItem), active: typeof variables.i === 'number' ? variables.i : undefined },
-        { label: '右段副本', values: right.map(showItem), active: typeof variables.j === 'number' ? variables.j : undefined },
-        { label: '合併暫存', values: merged.map(showItem) },
+        { id: 'left', label: '左段副本', values: left.map(showItem), items: left, pointers: [{ label: 'i', index: Number(variables.i) }], regions: [{ from: 0, to: Number(variables.i) - 1, tone: 'excluded', label: '已取用' }, { from: Number(variables.i), to: Number(variables.i), tone: kind === 'move' ? 'move' : 'compare', label: 'i 指向' }] },
+        { id: 'right', label: '右段副本', values: right.map(showItem), items: right, pointers: [{ label: 'j', index: Number(variables.j) }], regions: [{ from: 0, to: Number(variables.j) - 1, tone: 'excluded', label: '已取用' }, { from: Number(variables.j), to: Number(variables.j), tone: kind === 'move' ? 'move' : 'compare', label: 'j 指向' }] },
+        { id: 'merged', label: '合併暫存', values: merged.map(showItem), items: merged, active: merged.length - 1 },
       ] : undefined,
       focusIndex: showing && typeof variables.start === 'number' ? variables.start : undefined,
     })

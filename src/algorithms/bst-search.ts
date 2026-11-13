@@ -1,5 +1,5 @@
 import { lessonTrace, order } from './lesson-trace'
-import type { Algorithm, Element, Result, Step } from './types'
+import type { Algorithm, Diagram, Element, Result, Step } from './types'
 
 export function searchTree(items: readonly Element[])
 {
@@ -42,6 +42,7 @@ export const traceBstSearch: Algorithm = ({ items, target }) =>
     }
   }
   layout(0, 0)
+  let emptyLink: Diagram['emptyLink']
   const visited: number[] = []
   const labels = tree.map(([value]) => value)
   Object.assign(variables, { target, node: null, value: null, left: null, right: null })
@@ -49,7 +50,7 @@ export const traceBstSearch: Algorithm = ({ items, target }) =>
   {
     const node = variables.node as number | null
     record(line, message, kind, {
-      diagram: { labels, levels, edges, visited, active: node !== null && node >= 0 ? node : undefined },
+      diagram: { labels, levels, edges, visited, children: tree.map(entry => [entry[1], entry[2]] as [number, number]), emptyLink, active: node !== null && node >= 0 ? node : undefined },
       rows: [{ label: '查找路徑', values: visited.map(id => labels[id]) }],
     }, result)
   }
@@ -75,6 +76,7 @@ export const traceBstSearch: Algorithm = ({ items, target }) =>
     metrics.comparisons++
     const smaller = target < value
     frame('compare', `${target} ${order(target, value)} ${value}，接下來往${smaller ? '左' : '右'}。`, 'compare')
+    emptyLink = (smaller ? left : right) < 0 ? { parent: node, side: smaller ? 'left' : 'right' } : undefined
     node = smaller ? left : right
     variables.node = node
     frame(smaller ? 'left' : 'right', node < 0 ? '這一側沒有子節點。' : `移到節點 ${node}，其值為 ${labels[node]}。`)

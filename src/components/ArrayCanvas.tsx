@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
-import type { ArrayView, Element, Step } from '../algorithms/types'
+import type { ArrayView, Step } from '../algorithms/types'
 import { StepNote } from './StepNote'
+import { ElementValue } from './ElementValue'
 
 interface Props
 {
@@ -18,11 +19,6 @@ function displayValue(value: number | boolean | null)
   if (value === null) return '未設定'
   if (typeof value === 'boolean') return value ? '是' : '否'
   return value
-}
-
-export function itemLabel(item: Element)
-{
-  return `#${Number(item.id.slice(1)) + 1}`
 }
 
 export function ArrayCanvas({ view, labels, animate = false, preview = false, step, playing = false, follow = false }: Props)
@@ -149,9 +145,8 @@ export function ArrayCanvas({ view, labels, animate = false, preview = false, st
                   <span className="array-index mono" aria-label={`索引 ${index}`}>{index}</span>
                   <div className={`array-slot ${region?.tone ?? ''} ${marked?.tone ?? ''}`}
                     data-step-focus={focused ? '' : undefined}>
-                    {item ? <div className="array-item" key={item.id} data-item-id={item.id}>
-                      <strong className="mono">{item.value}</strong>
-                      <span className="item-id mono">{itemLabel(item)}</span>
+                    {item ? <div className="array-item" key={item.id} data-item-id={item.id} data-motion-key={`array:${item.id}`}>
+                      <ElementValue item={item} digit={view.digit} />
                     </div> : <span className="array-gap">空格</span>}
                   </div>
                   <div className="cell-labels">
@@ -160,7 +155,7 @@ export function ArrayCanvas({ view, labels, animate = false, preview = false, st
                     {region?.tone === 'settled' && (
                       <span className="marker settled"><span aria-hidden="true">✓ </span>{region.label}</span>
                     )}
-                    {region?.tone === 'excluded' && <span className="marker excluded">{region.label}</span>}
+                    {region && region.tone !== 'settled' && <span className={`marker ${region.tone}`}>{region.label}</span>}
                     {view.pointers.filter(pointer => pointer.index === index).map(pointer => (
                       <span className="pointer mono" key={pointer.label}>↑ {pointer.label}</span>
                     ))}
@@ -169,6 +164,9 @@ export function ArrayCanvas({ view, labels, animate = false, preview = false, st
               )
             })}
           </ol>
+          {view.pointers.filter(pointer => pointer.index < 0 || pointer.index >= view.cells.length).map(pointer => (
+            <span className="region-tag" key={pointer.label}>{pointer.label} = {pointer.index}（已超出陣列）</span>
+          ))}
         </div>
       ) : <p className="empty-array">陣列目前是空的。可輸入整列資料或插入新值。</p>}
       {!preview && (
@@ -185,7 +183,7 @@ export function ArrayCanvas({ view, labels, animate = false, preview = false, st
             <div className="held-slot">
               <span>暫存元素</span>
               {view.held ? <div className="held-item mono" data-item-id={view.held.id}>
-                <strong>{view.held.value}</strong> <small>{itemLabel(view.held)}</small>
+                <strong>{view.held.value}</strong>
               </div> : <span className="muted">空</span>}
             </div>
           )}

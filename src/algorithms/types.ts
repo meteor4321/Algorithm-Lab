@@ -23,6 +23,7 @@ export interface MazeInput
 
 export interface MazeView
 {
+  readonly distances?: readonly (number | null)[]
   readonly map: MazeInput
   readonly active?: number
   readonly candidate?: number
@@ -34,6 +35,9 @@ export interface MazeView
 
 export interface Diagram
 {
+  readonly children?: readonly (readonly [number, number])[]
+  readonly roles?: readonly { readonly node: number; readonly label: string }[]
+  readonly emptyLink?: { readonly parent: number; readonly side: 'left' | 'right' }
   readonly labels: readonly number[]
   readonly edges: readonly (readonly [number, number])[]
   readonly levels?: readonly (readonly number[])[]
@@ -44,6 +48,15 @@ export interface Diagram
 
 export interface DetailRow
 {
+  readonly digit?: ArrayView['digit']
+  readonly id?: string
+  readonly items?: readonly (Element | null)[]
+  readonly pointers?: readonly Pointer[]
+  readonly regions?: readonly Region[]
+  readonly offset?: number
+  readonly note?: string
+  readonly linked?: boolean
+  readonly indexed?: boolean
   readonly label: string
   readonly values: readonly (string | number)[]
   readonly active?: number
@@ -60,11 +73,14 @@ export interface Region
   readonly label: string
   readonly from: number
   readonly to: number
-  readonly tone: 'settled' | 'candidate' | 'excluded'
+  readonly tone: 'settled' | 'candidate' | 'excluded' | 'compare' | 'move' | 'prefix' | 'suffix'
 }
 
 export interface ArrayView
 {
+  readonly digit?: { readonly place: number; readonly offset: number }
+  readonly annotation?: string
+  readonly transfer?: { readonly ids: readonly string[]; readonly from: string; readonly to: string }
   readonly type: 'array'
   readonly cells: readonly (Element | null)[]
   readonly pointers: readonly Pointer[]

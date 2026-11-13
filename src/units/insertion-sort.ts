@@ -41,7 +41,7 @@ export const insertionSortUnit: Unit =
   ],
   code: teachingCode(source),
   variables: { index: '本輪索引', scan: '向左檢查的索引', key: '待插入值' },
-  examples: [{ label: '右移與插回', input: input([4, 2, 7, 1, 3]) }],
+  examples: [{ label: '右移與插回', input: input([4, 2, 7, 1, 3]) }, { label: '相等不右移，維持原順序', input: input([4,2,4,1,2]) }],
   practice: input([7, 2, 5, 2, -3]),
   run: traceInsertionSort,
 }

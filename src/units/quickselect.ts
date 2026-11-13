@@ -15,23 +15,34 @@ export const quickselectUnit: Unit =
   rankInput: true,
   cards: [
     {
-      title: '只找指定名次',
-      text: '在 8、2、7、1、4 中找第 4 小。先把排名 4 換成從 0 起算的索引 3。',
+      title: '只找第幾小，不必排完整列',
+      text: '在 8、2、7、1、4 中找第 4 小，先把排名 4 換成索引 wanted=3。重複值也各占一名，例如兩個 2 會占兩個位置。',
       show: step => step.executedLineId === 'wanted',
     },
     {
-      title: '用基準值確定一個位置',
-      text: '用 4 當基準值，分區後它到索引 2。左邊的 2 和 1 都比它小。',
+      title: '先做一次分區，確定一張牌的位置',
+      text: '選最右端的 4 為 pivot，scan 往右掃，boundary 記住下一個小值位置。遇到 2 < 4，就把 2 換到 boundary，再把分界右移；其餘值仍待後續處理。',
+      show: step => step.executedLineId === 'move-small',
+    },
+    {
+      title: '基準值的位置就是它的排名線索',
+      text: '分區完成後，4 在索引 2，左邊兩個值都比它小，所以它是第 3 小。左右兩邊還不必各自排好，我們已經能判斷第 4 小在哪一邊。',
       show: step => step.executedLineId === 'place',
     },
     {
-      title: '只繼續找包含目標的那側',
-      text: '索引 3 在基準值右邊，接下來只看右側的 8 和 7。',
+      title: '只留下包含目標索引的一側',
+      text: 'wanted=3 在索引 2 的右邊，因此只保留 8、7。左側連同 4 都標為不再搜尋；它們的值不可能是這次要找的第 4 小。',
       show: step => step.executedLineId === 'right-half',
     },
     {
-      title: '基準值到目標索引就完成',
-      text: '分區得到的索引等於 3 時，回傳該處的 7。若每次分區只排除一格，格數加倍時，最差比較次數約變成四倍。',
+      title: '換個排名，就可能改走左側',
+      text: '同一列改找第 1 小，wanted=0。第一次分區仍把 4 放在索引 2，但這次只保留左側 2、1，右側不用再處理。',
+      example: 1,
+      show: step => step.executedLineId === 'left-half',
+    },
+    {
+      title: '基準值落在 wanted 就停止',
+      text: '回到找第 4 小的例子，7 最後落在索引 3，回傳 7 即可。若分區一直只能排除一格，最差為 O(n²)；不需要為了回傳這個值把整列都排好。',
       show: step => step.executedLineId === 'result',
     },
   ],
@@ -40,6 +51,7 @@ export const quickselectUnit: Unit =
   examples: [
     { label: '找第 4 小', input: input([8,2,7,1,4], 4) },
     { label: '找最小值', input: input([8,2,7,1,4], 1) },
+    { label: '多輪縮小範圍', input: input([9,3,7,1,8,2,6,4,5], 8) },
   ],
   practice: input([6,2,-1,5,2], 3),
   run: traceQuickselect,

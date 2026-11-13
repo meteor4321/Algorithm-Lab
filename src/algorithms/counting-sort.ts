@@ -11,14 +11,16 @@ export const traceCountingSort: Algorithm = ({ items }) =>
   let countLabel = '出現次數'
   function frame(line: string | null, message: string, kind: Step['kind'] = 'update', countIndex?: number, source?: number, destination?: number)
   {
-    const start = Math.max(0, (countIndex ?? 0) - 3)
-    const end = Math.min(counts.length, start + 7)
-    const countRow = counts.slice(start, end).map((count, index) => `${low + start + index} → ${count}`)
+    const countRow = counts.map((count, index) => `${low + index} → ${count}`)
     record(line, message, kind, {
       focusIndex: source,
+      transfer: line === 'place' && source !== undefined ? { from: 'array', to: 'output', ids: [values[source].id] } : undefined,
+      annotation: destination !== undefined ? `原值 ${variables.value}：累計數先減 1 得到輸出索引 ${destination}，再把整個元素放入該格。` : '依原值計數，再累計小於或等於各值的元素數量。',
       rows: [
-        { label: countLabel, values: countRow, active: countIndex === undefined ? undefined : countIndex - start },
-        ...(output ? [{ label: '輸出陣列', values: output.map(item => item ? showItem(item) : '空格'), active: destination }] : []),
+        { label: countLabel, values: countRow, active: countIndex, note: '上方是表索引；格內是原值 → 次數／累計值。原值減 low 才是表索引。',
+          regions: countIndex === undefined ? [] : [{ from: countIndex, to: countIndex, tone: 'move', label: line === 'count' || line === 'prefix' || line === 'position' ? '剛更新' : '使用這格' }] },
+        ...(output ? [{ id: 'output', label: '輸出陣列', items: output, values: output.map(item => item ? showItem(item) : '空格'), active: destination,
+          regions: output.flatMap((item, index) => item ? [{ from: index, to: index, tone: 'settled' as const, label: '已放入' }] : []) }] : []),
       ],
     })
   }
@@ -28,7 +30,7 @@ export const traceCountingSort: Algorithm = ({ items }) =>
   variables.low = low
   frame('low', `最小值是 ${low}，計數表從這個值開始。`)
   counts.push(...Array(Math.max(...values.map(item => item.value)) - low + 1).fill(0))
-  frame('counts', `準備 ${counts.length} 個計數格，畫布顯示目前附近的格子。`)
+  frame('counts', `準備 ${counts.length} 個計數格，可橫向捲動查看完整表格。`)
   for (const [index, item] of values.entries())
   {
     variables.value = item.value

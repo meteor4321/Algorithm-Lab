@@ -37,6 +37,7 @@ export const selectionSortUnit: Unit =
   variables: { index: '就位索引', smallest: '目前最小的索引', scan: '掃描索引' },
   examples: [
     { label: '挑最小值', input: input([7,4,9,2,5]) },
+    { label: '交換使相等值順序改變', input: input([4,4,1,5,6]) },
   ],
   practice: input([6,2,-1,5,2]),
   run: traceSelectionSort,

@@ -20,7 +20,10 @@ export const traceHeapSort: Algorithm = ({ items }) =>
     if (root !== undefined) pointers.push({ label: 'root', index: root })
     if (child !== undefined) pointers.push({ label: 'child', index: child })
     record(line, message, kind, {
-      diagram: { labels: values.slice(0, size).map(item => item.value), edges, levels, active: child ?? root },
+      diagram: { labels: values.slice(0, size).map(item => item.value), edges, levels, active: child ?? root,
+        children: Array.from({ length: size }, (_, index) => [2 * index + 1 < size ? 2 * index + 1 : -1, 2 * index + 2 < size ? 2 * index + 2 : -1] as [number, number]),
+        roles: [...(root !== undefined ? [{ node: root, label: '父 root' }] : []), ...(child !== undefined ? [{ node: child, label: '候選 child' }] : [])] },
+      annotation: '索引 i 的左子節點是 2i+1，右子節點是 2i+2。先選較大的子節點，再和父節點比較。',
       pointers,
       focusIndex: child ?? root,
       regions: size < values.length ? [{ from: size, to: values.length - 1, tone: 'settled', label: '已排序' }] : [],

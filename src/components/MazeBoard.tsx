@@ -19,8 +19,8 @@ export function MazeBoard({ view, onSelect, isDisabled }: {
       : visited.includes(cell) ? '已發現' : undefined
     const glyph = endpoint?.[0] ?? (state ? { 目前位置: '●', 剛退回: '↶', 查看中的鄰格: '？', 路線: '◆', 待查看: '待', 已發現: '✓' }[state] : '')
     const position = `第 ${Math.floor(cell / map.width) + 1} 列第 ${cell % map.width + 1} 欄`
-    const label = [position, `格 ${cell}`, endpoint, state, wall ? '牆' : '可走'].filter(Boolean).join('，')
-    const content = wall ? '■' : <><span className="maze-id">{cell}</span><span className="maze-symbol">{glyph}</span></>
+    const label = [view.distances?.[cell] != null ? `距離起點 ${view.distances[cell]} 步` : undefined, position, `格 ${cell}`, endpoint, state, wall ? '牆' : '可走'].filter(Boolean).join('，')
+    const content = wall ? '■' : <><span className="maze-id">{cell}</span><span className="maze-symbol">{glyph}</span>{view.distances?.[cell] != null && <span className="maze-distance">d={view.distances[cell]}</span>}</>
     return onSelect
       ? <button type="button" key={cell} className="maze-cell" data-wall={wall} data-endpoint={endpoint} data-state={state}
           disabled={isDisabled?.(cell)} aria-label={label} onClick={() => onSelect(cell)}>{content}</button>

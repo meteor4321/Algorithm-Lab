@@ -14,23 +14,28 @@ export const bucketSortUnit: Unit =
   complexity: '成本隨分布而變',
   cards: [
     {
-      title: '把範圍切成區間',
-      text: '要整理 17、3、9、6、15、5，可以先把 3 到 17 分成幾個區間。每個區間用一個桶來裝。',
-      show: step => step.executedLineId === 'width',
+      title: '先用區間分開不同大小的數',
+      text: '整理 17、3、9、6、15、5 時，先找到最小值 3 和最大值 17。本例用四個等寬桶，每桶涵蓋四個整數，因此桶 0 是 3–6，桶 1 是 7–10，依此類推。',
+      show: step => step.executedLineId === 'buckets',
     },
     {
-      title: '按數值分到對應的桶',
-      text: '17 先進較右邊的桶，3 進最左邊的桶。每個值只要和同桶的值一起排序。',
+      title: '先找區間，再搬整張牌',
+      text: '17 落在 15–18 的桶 3；接著 3 落在桶 0。區間確定之後，不同桶的大小順序已經確定，但同桶內還可能是亂的。',
       show: step => step.executedLineId === 'distribute' && step.view.variables.value === 3,
     },
     {
-      title: '桶內排好再接回',
-      text: '先排左邊桶中的 3、6、5，再往右處理其他桶。接回時由區間小的桶先出。',
+      title: '同桶還要排序',
+      text: '分完後，桶 0 是 3、6、5，不能直接接回結果。這裡呼叫 Python 的穩定排序整理成 3、5、6；若想看桶內如何一步步整理，可先看插入排序單元。',
       show: step => step.executedLineId === 'sort-bucket',
     },
     {
-      title: '分得平均時桶內較短',
-      text: '全部接回後就得到升冪結果。資料增加時，各桶若仍分得均勻，單一桶內要排序的資料通常會比較少。',
+      title: '按區間從小到大收集',
+      text: '先把桶 0 的 3、5、6 接到輸出，再依序接桶 1、2、3。桶內已排好，不同桶的範圍又不重疊，所以不用跨桶再比較。',
+      show: step => step.executedLineId === 'append',
+    },
+    {
+      title: '分布影響桶內工作量',
+      text: '四個桶接完就得到結果；同值同桶且桶內穩定，所以原順序能保留。資料若都擠在同一桶，仍要在那個桶內排序；桶數固定時，資料增加也會讓桶內工作增加。',
       show: step => step.executedLineId === 'result',
     },
   ],

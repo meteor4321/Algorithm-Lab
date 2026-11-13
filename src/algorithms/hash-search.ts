@@ -22,6 +22,8 @@ export const traceHashSearch: Algorithm = ({ items, target }) =>
     record(line, message, kind, {
       focusIndex: index,
       rows: table.map((chain, id) => ({
+        id: `bucket-${id}`, linked: true, items: chain.map(([position]) => values[position]),
+        note: chain.length ? `原陣列索引：${chain.map(([position]) => position).join(' → ')}` : '空桶：沒有候選值',
         label: `桶 ${id}${variables.bucket === id ? ' · 目前桶' : ''}`,
         values: chain.map(([position]) => showItem(values[position])),
         active: chain.findIndex(([position]) => position === index),

@@ -10,6 +10,7 @@ export const traceBreadthFirstSearch: Algorithm = ({ maze }) =>
   const queue: number[] = []
   const seen = new Set<number>()
   const parent: number[] = []
+  const distances: (number | null)[] = Array(graph.length).fill(null)
   let path: number[] = []
   let candidate: number | undefined
   Object.assign(variables, { start, target, node: null, neighbor: null })
@@ -17,7 +18,8 @@ export const traceBreadthFirstSearch: Algorithm = ({ maze }) =>
   {
     const node = variables.node
     record(line, message, kind, {
-      maze: { map, active: typeof node === 'number' ? node : undefined, candidate, visited: [...seen], pending: queue, path },
+      annotation: '格內 d 是距離起點的步數；佇列先處理較小距離，所以第一次發現終點的距離就是最短距離。',
+      maze: { map, distances, active: typeof node === 'number' ? node : undefined, candidate, visited: [...seen], pending: queue, path },
       rows: [
         { label: '待查看清單（佇列）', values: queue.map(label), active: queue.length ? 0 : undefined },
         { label: '各格是從哪裡來的', values: parent.flatMap((from, node) => from < 0 ? [] : [`${label(node)} ← ${label(from)}`]) },
@@ -30,6 +32,7 @@ export const traceBreadthFirstSearch: Algorithm = ({ maze }) =>
   queue.push(start)
   frame('queue', '將起點放入先進先出的佇列。')
   seen.add(start)
+  distances[start] = 0
   frame('seen', '記下起點已排入清單，避免它被重複加入。')
   parent.push(...Array(graph.length).fill(-1))
   frame('parent', '先留空每格的來路紀錄，找到新格子時再填寫。')
@@ -69,6 +72,7 @@ export const traceBreadthFirstSearch: Algorithm = ({ maze }) =>
         seen.add(neighbor)
         frame('discover', `記下${label(neighbor)}已發現。`)
         parent[neighbor] = node
+        distances[neighbor] = distances[node]! + 1
         frame('link', `記下${label(neighbor)}是從${label(node)}走過來的。`)
         queue.push(neighbor)
         candidate = undefined

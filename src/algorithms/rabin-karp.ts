@@ -12,12 +12,27 @@ export const traceRabinKarp: Algorithm = ({ text }) =>
   let windowValues: string[] = []
   function frame(line: string | null, message: string, kind: Step['kind'] = 'update', result?: Result)
   {
-    const active = variables.start ?? variables.i
+    const start = typeof variables.start === 'number' ? variables.start : 0
+    const shifted = line === 'remove' || line === 'roll'
+    const windowStart = start + (shifted ? 1 : 0)
+    const active = typeof variables.start === 'number' ? windowStart : variables.i
     record(line, message, kind, {
+      annotation: line === 'remove' ? `移除索引 ${start} 的字元：先扣除字碼 × 最左權重，其餘字元暫留。`
+        : line === 'roll' ? `保留中間字元，雜湊乘 base 後加入索引 ${start + size} 的字碼，再取 mod 餘數。`
+        : '字碼依位置加權組成雜湊，再取餘數。雜湊不同可略過；相同仍要核對完整字串。',
       rows: [
-        { label: '文字', values: letters, active: typeof active === 'number' ? active : undefined },
-        { label: '搜尋樣式', values: pattern },
-        { label: '目前視窗', values: windowValues },
+        { label: '文字', values: letters, offset: 0, active: typeof active === 'number' ? active : undefined,
+          pointers: [{ label: '視窗左界', index: windowStart }, { label: '視窗右界', index: windowStart + windowValues.length - 1 }],
+          regions: [
+            ...(shifted ? [{ from: start, to: start, tone: 'excluded' as const, label: '離開' }] : []),
+            ...(line === 'roll' ? [{ from: start + size, to: start + size, tone: 'move' as const, label: '進入' }] : []),
+            { from: windowStart, to: windowStart + windowValues.length - 1, tone: 'candidate', label: '視窗內' },
+          ] },
+        { label: '搜尋樣式', values: pattern, offset: windowStart },
+        { label: '目前視窗', values: windowValues, offset: windowStart,
+          note: `目前雜湊 ${variables.window ?? '未設定'}；樣式雜湊 ${variables.expected ?? '未設定'}。` },
+        { label: '樣式字碼', values: pattern.map(char => char.codePointAt(0)!), offset: 0,
+          note: '每個字元先轉成 Unicode 字碼；同一個字碼放在不同位置會乘上不同權重。' },
       ],
     }, result)
   }

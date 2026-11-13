@@ -1,5 +1,5 @@
 import { lessonTrace, showItem } from './lesson-trace'
-import type { Algorithm, Element, Step } from './types'
+import type { Algorithm, ArrayView, Element, Step } from './types'
 
 export const traceRadixSort: Algorithm = ({ items }) =>
 {
@@ -7,15 +7,28 @@ export const traceRadixSort: Algorithm = ({ items }) =>
   Object.assign(variables, { offset: null, maximum: null, place: null, value: null, digit: null })
   let buckets: Element[][] = []
   let output: Element[] | undefined
+  let bucketPlace = 1
   function frame(line: string | null, message: string, kind: Step['kind'] = 'update', active?: number, source?: number)
   {
+    const transfer: ArrayView['transfer'] = line === 'distribute' && source !== undefined ? { from: 'array', to: `bucket-${active}`, ids: [values[source].id] }
+      : line === 'append' && active !== undefined ? { from: `bucket-${active}`, to: 'output', ids: buckets[active].map(item => item.id) }
+      : line === 'collect' && kind === 'check' && output ? { from: 'output', to: 'array', ids: output.map(item => item.id) } : undefined
     record(line, message, kind, {
+      transfer,
+      digit: typeof variables.place === 'number' && variables.place <= Number(variables.maximum) ? { place: variables.place, offset: Number(variables.offset) } : undefined,
+      annotation: line === 'advance' || (line === 'pass' && variables.place !== bucketPlace)
+        ? `接下來檢查位值 ${variables.place} 是否需要處理；桶仍保留上一輪位值 ${bucketPlace} 的結果，建立新桶後才重新分發。`
+        : typeof variables.place === 'number' ? `本輪看位值 ${variables.place}；黃底標出這一位，不足位數補 0，整張數字牌一起搬移。同桶依加入順序收回。` : '先看個位，再看十位；每輪都搬移完整數字。',
       focusIndex: source,
       rows: [
-        ...buckets.flatMap((bucket, index) => bucket.length || active === index ? [{
-          label: `桶 ${index}${active === index ? ' · 目前桶' : ''}`, values: bucket.map(showItem),
-        }] : []),
-        ...(output ? [{ label: '本輪收集結果', values: output.map(showItem) }] : []),
+        ...buckets.map((bucket, index) => ({
+          id: `bucket-${index}`, label: `桶 ${index}${active === index ? ' · 目前桶' : ''}`,
+          values: bucket.map(showItem), items: bucket,
+          digit: { place: bucketPlace, offset: Number(variables.offset) },
+          active: line === 'distribute' && active === index ? bucket.length - 1 : undefined,
+          note: `位值 ${bucketPlace} · 從左收回`,
+        })),
+        ...(output ? [{ id: 'output', label: `位值 ${bucketPlace} 的收集結果`, values: output.map(showItem), items: output, digit: { place: bucketPlace, offset: Number(variables.offset) } }] : []),
       ],
     })
   }
@@ -33,6 +46,7 @@ export const traceRadixSort: Algorithm = ({ items }) =>
   {
     frame('pass', `處理位值 ${place}。`, 'check')
     buckets = Array.from({ length: 10 }, () => [])
+    bucketPlace = place
     output = undefined
     frame('buckets', '準備數字 0 到 9 的十個桶。')
     for (const [index, item] of values.entries())

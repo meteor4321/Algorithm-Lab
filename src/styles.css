@@ -225,7 +225,6 @@ code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .array-item { display: grid; place-content: center; width: 100%; height: 100%; position: relative; border-radius: 5px; background: inherit; }
 .array-item strong { font-size: 1.5rem; line-height: 1; }
 .array-slot[data-step-focus] .array-item strong { font-size: 1.75rem; font-weight: 800; }
-.item-id { font-size: .78rem; color: #4c6256; margin-top: 3px; }
 .array-gap { color: #3c4b43; font-size: .9rem; font-weight: 700; }
 .cell-labels { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 84px; padding-top: 4px; }
 .marker, .pointer { padding: 1px 3px; font-size: .78rem; line-height: 1.24; }
@@ -250,7 +249,6 @@ code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .variable dd { margin-top: 2px; font-size: .98rem; font-weight: 650; }
 .held-slot { display: flex; gap: 8px; align-items: center; min-height: 34px; margin-top: 7px; font-size: .88rem; }
 .held-item { position: relative; padding: 3px 8px; border-radius: 5px; background: #fff3d5; border: 2px solid #a78847; }
-.held-item small { color: #59461f; }
 
 .playback { margin-top: 10px; }
 .step-area {
@@ -413,3 +411,65 @@ button.maze-cell:not(:disabled):hover { box-shadow: inset 0 0 0 2px #27675a; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
 }
+
+/* Teaching roles stay readable without relying on color alone. */
+.canvas-annotation { margin: 0 0 12px; padding: 10px 12px; background: #edf3fa; border-left: 4px solid #326290; border-radius: 5px; line-height: 1.7; }
+.detail-rows { display: grid; gap: 9px; min-width: 0; }
+.row-note { margin: 5px 0; font-size: .8rem; color: #46594f; line-height: 1.6; }
+.lesson-row-values { align-items: stretch; padding: 4px; gap: 8px; }
+.lesson-row-values .detail-position { display: flex; flex-direction: column; align-items: center; min-width: 54px; padding: 5px; }
+.detail-index { font-size: .7rem; color: #53615a; margin-bottom: 3px; }
+.detail-value { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 36px; min-height: 40px; gap: 3px; border-radius: 4px; }
+.detail-value strong { font-size: 1.1rem; }
+.detail-tag { font-size: .65rem; line-height: 1.4; white-space: nowrap; }
+.lesson-row-values li.prefix, .array-slot.prefix { background: #eee5fb; border-color: #75529c; }
+.lesson-row-values li.suffix, .array-slot.suffix { background: #fff0dc; border-color: #a16a2a; }
+.lesson-row-values li.settled { background: #dcf1e3; border-color: #3c7c53; }
+.lesson-row-values li.excluded { background: #e9ecea; color: #53615a; }
+.lesson-row-values li.candidate { background: #e7f1fb; border-color: #38668e; }
+.lesson-row-values li.move { background: #fff0bf; border-color: #8f6d14; }
+.lesson-row-values li[data-active] { box-shadow: inset 0 0 0 2px #255b95; }
+.lesson-row-values li.alignment-gap { flex: 0 0 54px; border: 0; background: transparent; padding: 0; }
+.aligned-rows { overflow-x: auto; display: block; }
+.aligned-rows .lesson-row { width: max-content; min-width: 100%; margin-bottom: 8px; }
+.aligned-rows .lesson-row-values { overflow: visible; }
+.aligned-rows .detail-position { width: 54px; min-width: 54px; flex: 0 0 54px; }
+.aligned-rows .row-note { max-width: 440px; }
+.linked .detail-position:not(:last-child) { margin-right: 16px; position: relative; }
+.linked .detail-position:not(:last-child)::after { content: '→'; position: absolute; right: -24px; top: 25px; }
+.digit-active { display: inline-block; background: #ffdb70; color: #442e00; border-bottom: 3px solid #8a5d00; border-radius: 3px; padding: 0 1px; }
+.digit-key { display: block; font-size: .68rem; white-space: nowrap; }
+.array-item:has(.digit-key) strong { font-size: 1.2rem; }
+.array-item:has(.digit-key) { gap: 1px; }
+.element-flight { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3px; background: #fff5d5; border: 2px solid #947125; border-radius: 5px; box-shadow: 0 3px 12px #253b3428; }
+.tree-scroll { overflow-x: auto; min-width: 0; }
+.tree-scroll .lesson-diagram { max-width: none; width: 100%; }
+.lesson-diagram .node-id { font-size: 10px; font-weight: 500; }
+.lesson-diagram .edge-label { font-size: 10px; paint-order: stroke; stroke: #fff; stroke-width: 4px; }
+.lesson-diagram .empty-link text { font-size: 10px; fill: #98432d; }
+.lesson-diagram .empty-link line { stroke: #98432d; }
+.maze-distance { position: absolute; right: 2px; bottom: 1px; font: 600 .62rem var(--mono); color: #164c6a; background: #ffffffd9; border-radius: 2px; }
+@media (max-width: 600px) {
+  .canvas-annotation { font-size: .82rem; }
+  .lesson-row { padding: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .element-flight { display: none; }
+}
+
+.lesson-canvas { container-type: inline-size; }
+.bucket-rows { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.bucket-rows > :not([data-bucket]) { grid-column: 1 / -1; }
+.lesson-row[data-bucket] { min-height: 100px; }
+.lesson-row[data-bucket] > strong { display: block; min-height: 2.6em; font-size: .76rem; }
+.lesson-row[data-bucket] .row-note { min-height: 0; font-size: .68rem; }
+@container (min-width: 450px) {
+  .bucket-rows { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container (min-width: 620px) {
+  .bucket-rows { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+.lesson-row-values li.compare { background: #e3eeff; border-color: #356493; }
+.region-tag.prefix, .marker.prefix { background: #eee5fb; color: #56317a; }
+.region-tag.suffix, .marker.suffix { background: #fff0dc; color: #79501e; }

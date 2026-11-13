@@ -1,7 +1,7 @@
 import { useId, useRef, useState } from 'react'
 import { firstInversion, MAX_ITEMS, MAX_VALUE, MIN_VALUE, parseArray, parseInteger } from '../algorithms/input'
 import type { Element, Input } from '../algorithms/types'
-import { ArrayCanvas, itemLabel } from './ArrayCanvas'
+import { ArrayCanvas } from './ArrayCanvas'
 import { Icon } from './Icon'
 
 const serialize = (items: readonly Element[]) => items.map(item => item.value).join(', ')
@@ -133,7 +133,7 @@ export function PracticeEditor({ input, sorted, rank = false, onApply, onCancel 
               setIndex(next)
               setCellText(String(items[next].value))
             }}>
-              {items.map((item, position) => <option value={position} key={item.id}>索引 {position} · {itemLabel(item)}</option>)}
+              {items.map((item, position) => <option value={position} key={item.id}>索引 {position} · 值 {item.value}</option>)}
             </select>
           </label>
           <label className="field cell-field">

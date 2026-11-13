@@ -1,5 +1,5 @@
 import { lessonTrace, showItem } from './lesson-trace'
-import type { Algorithm, Element, Step } from './types'
+import type { Algorithm, ArrayView, Element, Step } from './types'
 
 export const traceBucketSort: Algorithm = ({ items }) =>
 {
@@ -11,14 +11,20 @@ export const traceBucketSort: Algorithm = ({ items }) =>
   let width = 0
   function frame(line: string | null, message: string, kind: Step['kind'] = 'update', active?: number, source?: number)
   {
+    const transfer: ArrayView['transfer'] = line === 'distribute' && source !== undefined ? { from: 'array', to: `bucket-${active}`, ids: [values[source].id] }
+      : line === 'append' && active !== undefined ? { from: `bucket-${active}`, to: 'output', ids: buckets[active].map(item => item.id) } : undefined
     record(line, message, kind, {
+      transfer,
+      annotation: '先按區間分桶，再排桶內。桶內排序使用 Python 的穩定排序；可先練習插入排序理解桶內的整理。',
       focusIndex: source,
       rows: [
         ...buckets.map((bucket, index) => ({
+          id: `bucket-${index}`, items: bucket,
+          active: line === 'distribute' && active === index ? bucket.length - 1 : undefined,
           label: `桶 ${index}（${low + width * index} 到 ${low + width * (index + 1) - 1}）${active === index ? ' · 目前桶' : ''}`,
           values: bucket.map(showItem),
         })),
-        ...(output ? [{ label: '輸出陣列', values: output.map(showItem) }] : []),
+        ...(output ? [{ id: 'output', label: '輸出陣列', values: output.map(showItem), items: output }] : []),
       ],
     })
   }
@@ -56,5 +62,9 @@ export const traceBucketSort: Algorithm = ({ items }) =>
   }
   frame('collect', '所有桶都已收集。', 'check')
   values.splice(0, values.length, ...output)
-  return sorted()
+  return sorted('result', {
+    transfer: { from: 'output', to: 'array', ids: values.map(item => item.id) },
+    rows: [{ id: 'output', label: '輸出陣列', values: values.map(showItem), items: values }],
+    annotation: '依區間順序接回後，整列已排序；輸出保留一份結果供對照。',
+  })
 }

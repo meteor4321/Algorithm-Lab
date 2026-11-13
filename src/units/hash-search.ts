@@ -15,7 +15,7 @@ export const hashSearchUnit: Unit =
   cards: [
     {
       title: '像用分格收納盒找物品',
-      text: '6、11、16 除以 5 的餘數都是 1，所以會放進同一桶。不同值落在同一桶，稱為碰撞。',
+      text: '像先把物品放進有編號的收納盒，再用同樣規則查找。資料先依除以 5 的餘數建表：6、11、16 都進桶 1，4 進桶 4；不同值落在同桶叫碰撞。本單元從建好的表開始，箭頭表示桶內查看的先後。',
     },
     {
       title: '用同一個規則找桶',
@@ -39,6 +39,8 @@ export const hashSearchUnit: Unit =
   examples: [
     { label: '碰撞後命中', input: input([6,11,16,4], 16) },
     { label: '碰撞但查無', input: input([6,11,16,4], 21) },
+    { label: '分布在多個桶', input: input([10,6,12,8,4,11,17,23], 17) },
+    { label: '目標落在空桶', input: input([5,10,6,11,4,9], 3) },
   ],
   practice: input([6,11,-4,9,5], -4),
   run: traceHashSearch,

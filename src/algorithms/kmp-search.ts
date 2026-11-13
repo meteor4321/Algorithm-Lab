@@ -10,15 +10,32 @@ export const traceKmpSearch: Algorithm = ({ text }) =>
   const { variables, metrics, record, finish } = lessonTrace([])
   Object.assign(variables, { i: null, j: null })
   let building = true
+  let fallbackRead: number | undefined
+  let fallbackLength = 0
   let i = 0
   let j = 0
   function frame(line: string | null, message: string, kind: Step['kind'] = 'update', result?: Result)
   {
+    const matched = Math.min(j, pattern.length)
+    const isFallback = line === 'fallback' || line === 'prefix-fallback'
+    const prefixLength = building ? prefix[i] ?? 0 : matched
     record(line, message, kind, {
+      annotation: building
+        ? '建表：i 是樣式目前格，j 是可延長的前綴長度。紫色是前綴，橙色是同長度後綴；前綴必須比整段短。'
+        : isFallback ? `原先匹配 ${fallbackLength} 字元，讀 prefix[${fallbackRead}] = ${j}；保留最後 ${j} 字元，i = ${i} 不動。`
+          : `搜尋：樣式起點對齊文字索引 ${i - j}；綠色 ${matched} 格已匹配，只比較 i 與 j。`,
       rows: [
-        { label: '文字', values: letters, active: building ? undefined : i },
-        { label: '搜尋樣式', values: pattern, active: building ? i : j },
-        { label: '前綴表', values: prefix, active: building ? i : j - 1 },
+        { label: '文字', values: letters, offset: 0, active: building ? undefined : i,
+          pointers: building ? [] : [{ label: 'i', index: i }],
+          regions: building ? [] : [{ from: i - matched, to: i - 1, tone: 'settled', label: '已匹配' }] },
+        { label: '搜尋樣式', values: pattern, offset: building ? 0 : Math.max(0, i - j), active: building ? i : j,
+          pointers: building ? [{ label: 'i', index: i }, { label: 'j', index: j }] : [{ label: 'j', index: j }],
+          regions: building ? [
+            { from: 0, to: prefixLength - 1, tone: 'prefix', label: '前綴' },
+            { from: i - prefixLength + 1, to: i, tone: 'suffix', label: '後綴' },
+          ] : [{ from: 0, to: matched - 1, tone: 'settled', label: '已匹配' }] },
+        { label: '前綴表 prefix', values: prefix, offset: 0, active: isFallback ? fallbackRead : building ? i : j - 1,
+          note: 'prefix[t]：樣式 0 到 t 這段，最長且不等於整段的相同前綴／後綴長度。' },
       ],
     }, result)
   }
@@ -50,6 +67,8 @@ export const traceKmpSearch: Algorithm = ({ text }) =>
       frame('prefix-can-fallback', j > 0 ? '還有已知的較短前綴可試。' : '目前前綴長度為 0。', 'check')
       if (j > 0)
       {
+        fallbackRead = j - 1
+        fallbackLength = j
         variables.j = j = prefix[j - 1]
         frame('prefix-fallback', `改用長度 ${j} 的前綴，繼續比同一格。`)
       }
@@ -89,6 +108,8 @@ export const traceKmpSearch: Algorithm = ({ text }) =>
       frame('can-fallback', j > 0 ? '有已匹配的字元，可查前綴表。' : '樣式第一個字元就不相符。', 'check')
       if (j > 0)
       {
+        fallbackRead = j - 1
+        fallbackLength = j
         variables.j = j = prefix[j - 1]
         frame('fallback', `保留 ${j} 個已匹配字元，文字指標維持原位。`)
       }

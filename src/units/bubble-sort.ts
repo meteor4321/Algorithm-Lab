@@ -36,7 +36,7 @@ export const bubbleSortUnit: Unit =
   ],
   code: teachingCode(source),
   variables: { end: '比較右界', index: '左側索引' },
-  examples: [{ label: '相鄰比較與交換', input: input([5, 3, 8, 4, 1]) }],
+  examples: [{ label: '相鄰比較與交換', input: input([5, 3, 8, 4, 1]) }, { label: '相等不交換，維持原順序', input: input([5,3,5,1,3]) }],
   practice: input([6, 2, -1, 5, 2]),
   run: traceBubbleSort,
 }

@@ -20,15 +20,26 @@ export function createTrace()
   function add(kind: Step['kind'], executedLineId: string | null, message: string, view: Omit<ArrayView, 'type'>, result?: Result)
   {
     const marked = view.marked && Object.freeze({ ...view.marked, indices: Object.freeze([...view.marked.indices]) })
-    const rows = view.rows && Object.freeze(view.rows.map(row => Object.freeze({ ...row, values: Object.freeze([...row.values]) })))
+    const rows = view.rows && Object.freeze(view.rows.map(row => Object.freeze({
+      ...row,
+      digit: row.digit && Object.freeze({ ...row.digit }),
+      values: Object.freeze([...row.values]),
+      items: row.items && Object.freeze([...row.items]),
+      pointers: row.pointers && Object.freeze(row.pointers.map(pointer => Object.freeze({ ...pointer }))),
+      regions: row.regions && Object.freeze(row.regions.map(region => Object.freeze({ ...region }))),
+    })))
     const maze = view.maze && Object.freeze({
       ...view.maze,
+      distances: view.maze.distances && Object.freeze([...view.maze.distances]),
       visited: view.maze.visited && Object.freeze([...view.maze.visited]),
       pending: view.maze.pending && Object.freeze([...view.maze.pending]),
       path: view.maze.path && Object.freeze([...view.maze.path]),
     })
     const diagram = view.diagram && Object.freeze({
       ...view.diagram,
+      children: view.diagram.children && Object.freeze(view.diagram.children.map(pair => Object.freeze([...pair] as [number, number]))),
+      roles: view.diagram.roles && Object.freeze(view.diagram.roles.map(role => Object.freeze({ ...role }))),
+      emptyLink: view.diagram.emptyLink && Object.freeze({ ...view.diagram.emptyLink }),
       labels: Object.freeze([...view.diagram.labels]),
       edges: Object.freeze(view.diagram.edges.map(edge => Object.freeze([...edge] as [number, number]))),
       levels: view.diagram.levels && Object.freeze(view.diagram.levels.map(level => Object.freeze([...level]))),
@@ -42,6 +53,8 @@ export function createTrace()
       metrics: Object.freeze<Metrics>({ ...metrics }),
       view: Object.freeze({
         ...view,
+        digit: view.digit && Object.freeze({ ...view.digit }),
+        transfer: view.transfer && Object.freeze({ ...view.transfer, ids: Object.freeze([...view.transfer.ids]) }),
         type: 'array',
         cells: Object.freeze([...view.cells]),
         variables: Object.freeze({ ...view.variables }),

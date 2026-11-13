@@ -16,15 +16,15 @@ export const traceQuickselect: Algorithm = ({ items, target }) =>
   let left = 0
   let right = values.length - 1
   Object.assign(variables, { left, right })
-  record('bounds', '候選範圍先包含整個陣列。', 'update', partitionView(left, right))
+  record('bounds', '候選範圍先包含整個陣列。', 'update', partitionView(left, right, [{ label: 'wanted', index: wanted }], values.length))
   while (left <= right)
   {
-    const range = partitionView(left, right)
+    const range = partitionView(left, right, [{ label: 'wanted', index: wanted }], values.length)
     record('loop', '範圍仍有候選值。', 'check', range)
     record('partition', '用分區確定一個值的最終索引。', 'update', range)
-    const pivotIndex = partition(trace, left, right)
+    const pivotIndex = partition(trace, left, right, () => ({ regions: partitionView(left, right, [], values.length).regions?.filter(region => region.tone === 'excluded') }))
     variables.pivot_index = pivotIndex
-    const focus = partitionView(left, right, [{ label: 'pivot_index', index: pivotIndex }])
+    const focus = partitionView(left, right, [{ label: 'pivot_index', index: pivotIndex }, { label: 'wanted', index: wanted }], values.length)
     record('hit', `${pivotIndex} ${order(pivotIndex, wanted)} ${wanted}，${pivotIndex === wanted ? '這就是指定的排名。' : '接著決定要查哪一側。'}`, 'check', focus)
     if (pivotIndex === wanted)
     {
@@ -37,13 +37,13 @@ export const traceQuickselect: Algorithm = ({ items, target }) =>
     {
       left = pivotIndex + 1
       variables.left = left
-      record('right-half', `左界移到 ${left}。`, 'update', partitionView(left, right))
+      record('right-half', `左界移到 ${left}。`, 'update', partitionView(left, right, [{ label: 'wanted', index: wanted }], values.length))
     }
     else
     {
       right = pivotIndex - 1
       variables.right = right
-      record('left-half', `右界移到 ${right}。`, 'update', partitionView(left, right))
+      record('left-half', `右界移到 ${right}。`, 'update', partitionView(left, right, [{ label: 'wanted', index: wanted }], values.length))
     }
   }
   throw new Error('有效的排名必定能找到。')

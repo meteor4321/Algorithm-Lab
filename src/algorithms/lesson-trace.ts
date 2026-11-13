@@ -22,9 +22,10 @@ export function lessonTrace(items: readonly Element[])
     if (left !== right) trace.metrics.swaps++
   }
 
-  function sorted(line = 'result')
+  function sorted(line = 'result', view: FrameView = {})
   {
     record(line, '排序完成，回傳結果。', 'return', {
+      ...view,
       regions: [{ from: 0, to: values.length - 1, label: '已排序', tone: 'settled' }],
     }, { type: 'sorted', items: Object.freeze([...values]) })
     return trace.finish()
@@ -33,5 +34,5 @@ export function lessonTrace(items: readonly Element[])
   return { ...trace, values, variables, record, swap, sorted }
 }
 
-export const showItem = (item: Element) => `${item.value} · #${Number(item.id.slice(1)) + 1}`
+export const showItem = (item: Element) => item.value
 export const order = (a: number, b: number) => a < b ? '<' : a > b ? '>' : '='
